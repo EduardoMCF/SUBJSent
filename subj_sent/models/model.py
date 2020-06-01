@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 class Model(ABC):
     def __init__(self, input_shape, **create_params):
         self._input_shape = input_shape
-        self._model = self._create(self._input_shape,**create_params)
+        self._model = self._create(self._input_shape, **create_params)
 
     @abstractmethod
     def _create(self, **params) -> keras.models.Model:
@@ -16,7 +16,7 @@ class Model(ABC):
         return self._model.evaluate(X,y)
 
     def predict(self, data) -> list:
-        return self._model.predict(data)#reshape(-1, self._input_shape)
+        return self._model.predict(data)
 
     def load(self, path):
         self._model = keras.models.load_model(path)
