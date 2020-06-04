@@ -1,12 +1,41 @@
-from subj_sent.models.model import Model
-from subj_sent.models.mlp import MLP
+from subj_sent import train, predict
+from pathlib import Path
+import argparse
+import json
 
-model = MLP(1)
-#model.load('opa')
-X = [13,10,13,10,13,10,13,10,13,10]
-y = [0,1,0,1,0,1,0,1,0,1]
-history = model.train(X, y, epochs = 5, batch_size = 2, validation_split = 0.1)
-print(type(history))
-print(model.evaluate(X,y))
-print(model.predict(X))
-model.save('jooj')
+parser = argparse.ArgumentParser()
+parser.add_argument('--task', action='store', choices=['train', 'predict'],
+                    required = True, help = "The task that will be executed.")
+
+args = parser.parse_args()
+
+path = Path(__file__).parent / 'config.json'
+with path.open('r') as json_config:
+    config = json.load(json_config)
+
+data_path = config['data_path']
+load_model = config['load_model']
+model_path = config['model_path']
+train_params = config['train']
+model_params = config['model']
+preprocess_params = config['preprocess']
+embeddings_params = config['embeddings']
+
+
+if args.task == "train":
+    metric_names, metrics = train(data_path, load_model, model_path, model_params,
+                            embeddings_params, train_params, preprocess_params)
+    
+    print('\n'.join(f"{name} = {metric}" for name, metric in zip(metric_names, metrics)))
+else:
+    predict(data_path, model_path, model_params, embeddings_params, preprocess_params)
+    
+
+
+
+
+
+
+
+
+

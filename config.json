@@ -1,0 +1,41 @@
+{
+    "data_path" : "predict.csv",
+
+    "load_model" : true,
+    "model_path" : "drive/My Drive/SubjectivityClassification/saved_models/model 15.h5",
+
+    "embeddings" : {
+        "type" : "word",
+        "length" : 300,
+        "path" : "drive/My Drive/w2v/GoogleNews-vectors-negative300.bin",
+        "binary" : true,
+        "convert_to_w2v" : false
+    },
+
+    "model" : {
+        "type" : "CNN",
+        "params" : {
+            "activation" : "relu",
+            "num_filters" : 64, 
+            "kernel_sizes" : [2,3,4,7],
+            "dense_connections" : [128, 128, 64],
+            "dropout_rate" : [0.5, 0.5],
+            "metrics" : ["accuracy"],
+            "optimizer" : "adam",
+            "learning_rate" : 0.001,
+            "loss" : "binary_crossentropy"
+        }
+    },
+
+    "train" : {
+        "test_size" : 0.1,
+        "validation_size" : 0.1,
+        "batch_size" : 100,
+        "epochs" : 5,
+        "plot_history" : true
+    },
+
+    "preprocess" : {
+        "remove_stopwords" : false
+    }
+}

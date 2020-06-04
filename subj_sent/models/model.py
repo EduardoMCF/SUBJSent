@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+import keras
 
 class Model(ABC):
     def __init__(self, input_shape, **create_params):
         self._input_shape = input_shape
+        print('model/__init__', create_params)
         self._model = self._create(self._input_shape, **create_params)
 
     @abstractmethod
@@ -10,6 +12,7 @@ class Model(ABC):
         raise NotImplementedError
 
     def train(self, X, y, **params) -> keras.callbacks.History:
+        print('model/train',params)
         return self._model.fit(X, y, **params)
 
     def evaluate(self, X, y) -> list:
@@ -18,8 +21,14 @@ class Model(ABC):
     def predict(self, data) -> list:
         return self._model.predict(data)
 
-    def load(self, path):
-        self._model = keras.models.load_model(path)
+    @classmethod
+    def load(cls, path):
+        loaded_model = keras.models.load_model(path)
+        input_shape = loaded_model.input_shape[1:]
+        print('model/load',input_shape)
+        model = cls(input_shape)
+        model._model = loaded_model
+        return model
 
     def save(self, path):
         self._model.save(path)

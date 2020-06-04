@@ -7,28 +7,35 @@ import pandas as pd
 import numpy as np
 
 import itertools
+from pathlib import Path
 
-def load_sentences(path : str, train : bool = True) - > pd.DataFrame:
-    sentences = pd.read_csv(path).sample(frac = 1) # loads and shuffle the dataframe
+def load_sentences(path : str, train : bool = True) -> pd.DataFrame:
+    print('load/load_sentences')
+    sentences = pd.read_csv(path)
     
     labels = []
     if train:
         sentences, labels = sentences.text.copy(), sentences.label.copy()
+    else:
+        sentences = sentences.text.copy()
 
     return sentences, labels
 
 def load_word_embeddings(path : str, binary : bool = False, convert_to_w2v : bool = False) -> KeyedVectors:
+    print('Loading embeddings')
     if convert_to_w2v:
-        glove_file = datapath(f'{path}.{txt if not binary else bin}')
-        tmp_file = get_tmpfile(f"converted.{txt if not binary else bin}")
+        print(str(Path(path).parent / "converted"))
+        tmp_file = get_tmpfile("converted")
 
-        _ = glove2word2vec(glove_file, tmp_file)
+        _ = glove2word2vec(path, tmp_file)
+        print(tmp_file)
 
     path = tmp_file if convert_to_w2v else path
     model = KeyedVectors.load_word2vec_format(path ,binary = binary)
     return model
 
 def load_USE_embeddings(path : str):
+    print('Loading embeddings')
     model = hub.load(path)
     return model
     
