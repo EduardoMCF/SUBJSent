@@ -62,8 +62,9 @@ A CLI tem duas tasks principais: **train** e **predict**. As configurações de 
 
 ## Configurações
 - **Chave** - **Descrição**
-<details>
-<summary>Clique para mostrar</summary>
+	<details><summary>Clique para mostrar</summary>
+	
+	
 	- **data_path** - caminho para o csv de interesse. No caso do train para o csv com as sentenças e com os labels e no caso do predict para o csv com as sentenças.
 
 	- **model_path** - caminho para um arquivo **h5**, contendo o modelo que será utilizado no predict.
@@ -110,7 +111,7 @@ A CLI tem duas tasks principais: **train** e **predict**. As configurações de 
 
 	- **preprocess**
 		- **remove_stopwords** - booleano que indica se as stopwords deve ou não serem removidas durante o preprocessamento, o conjunto de stopwords utilizado é o english do nltk.
-</details>
+	</details>
 
 ## Mais Informações
 Há duas arquiteturas disponíveis para treinamento, uma CNN e um MLP.  Mais detalhes sobre elas podem ser encontrados [aqui](https://github.com/EduardoMCF/SUBJSent/tree/master/subj_sent/models "aqui").
