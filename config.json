@@ -1,18 +1,18 @@
 {
     "data_path" : "data.csv",
-    "model_path" : "drive/My Drive/SubjectivityClassification/saved_models/Model 9/model.h5",
+    "model_path" : "saved_models/Model 1/model.h5",
 
     "embeddings" : {
         "type" : "sentence",
         "word" : {
             "length" : 300,
-            "path" : "drive/My Drive/glove/glove.6B.300d.txt",
+            "path" : "",
             "binary" : false,
-            "convert_to_w2v" : true
+            "convert_to_w2v" : false
         },
         "sentence" : {
             "length" : 512,
-            "path" : "use"
+            "path" : ""
         }
     },
 
