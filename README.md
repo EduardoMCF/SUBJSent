@@ -21,11 +21,11 @@ A CLI tem duas tasks principais: **train** e **predict**. As configurações de 
       uma sentença objetiva, 0
       ...
   ```
-- **embeddings**
-  - **type** - tipo de embeddings que será utilizado pelo modelo, "word" ou "sentence".
-- **model**
-  - **type** - tipo de modelo a ser utilizado, "CNN" ou "MLP".
-- **train**
+  - **embeddings**
+    - **type** - tipo de embeddings que será utilizado pelo modelo, "word" ou "sentence".
+  - **model**
+    - **type** - tipo de modelo a ser utilizado, "CNN" ou "MLP".
+  - **train**
 - #### Saída
 	Após a execução a seguinte pasta será criada no diretório saved_models:
     
