@@ -15,12 +15,12 @@ A CLI tem duas tasks principais: **train** e **predict**. As configurações de 
   ```$ python subjsent --task train```
 - #### Requisitos
 	- **data_path** - 	caminho para um arquivo **csv** com as colunas **text** e **label**, e.g.
-  ```
-      text, label
-      uma sentença subjetiva, 1
-      uma sentença objetiva, 0
-      ...
-  ```
+      ```
+          text, label
+          uma sentença subjetiva, 1
+          uma sentença objetiva, 0
+          ...
+      ```
   - **embeddings**
     - **type** - tipo de embeddings que será utilizado pelo modelo, "word" ou "sentence".
   - **model**
@@ -42,12 +42,12 @@ A CLI tem duas tasks principais: **train** e **predict**. As configurações de 
 ```$ python subjsent --task predict```
 - #### Requisitos
 	- **data_path** - caminho para um arquivo **csv** com a coluna **text**, contendo as sentenças, e.g.
-  ```
-  text
-  sentença 1
-  sentença 2
-  ...
-  ```
+      ```
+      text
+      sentença 1
+      sentença 2
+      ...
+      ```
 	- **model_path** - caminho para um arquivo h5, contendo o modelo que será utilizado durante o predict.
 	- **embeddings**
 		- **type** - O tipo de embeddings que será utilizado pelo modelo, "word" ou "sentence".
