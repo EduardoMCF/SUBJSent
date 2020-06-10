@@ -1,6 +1,6 @@
-import keras
-from keras.optimizers import Adam
-from keras.layers import Dense, Dropout, Input
+import tensorflow.keras as keras
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Dense, Dropout, Input
 
 from .model import Model
 
@@ -28,4 +28,5 @@ class MLP(Model):
                       optimizer = optimizer(learning_rate = learning_rate),
                       metrics = metrics)
 
+        print(model.summary())
         return model
