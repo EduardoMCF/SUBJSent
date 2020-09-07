@@ -8,9 +8,9 @@ from pathlib import Path
 def log(msg: str):
     def log_decorator(func):
         def wrapper(*args, **kwargs):
-            print(f"{msg}...", end=" ")
+            print(f"[TASK] {msg} [STARTED]",  flush=True)
             result = func(*args, **kwargs)
-            print('finished')
+            print(f"[TASK] {msg} [FINISHED]")
             return result
         return wrapper
     return log_decorator
@@ -21,14 +21,18 @@ def plot_history(history: object, path: str):
     metrics_names = list(
         filter(lambda s: not s.startswith('val'), metrics_dict.keys()))
 
+    hasValidation = len(metrics_names) < len(metrics_dict.keys())
+
     fig, ax = plt.subplots(nrows=len(metrics_names), ncols=1)
     for i, metric in enumerate(metrics_names):
         ax[i].plot(metrics_dict[metric])
-        ax[i].plot(metrics_dict[f"val_{metric}"])
         ax[i].set_title(f'model {metric}')
         ax[i].set_ylabel(metric)
         ax[i].set_xlabel('epoch')
-        ax[i].legend(['train', 'validation'], loc='upper left')
+
+        if hasValidation:
+            ax[i].plot(metrics_dict[f"val_{metric}"])
+            ax[i].legend(['train', 'validation'], loc='upper left')
 
     fig.tight_layout()
     fig.savefig(f"{path}.png")

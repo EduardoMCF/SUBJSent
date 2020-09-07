@@ -10,9 +10,10 @@ import itertools
 from pathlib import Path
 from .util import log
 
-def load_sentences(path : str, train : bool = True) -> pd.DataFrame:
+
+def load_sentences(path: str, train: bool = True) -> pd.DataFrame:
     sentences = pd.read_csv(path)
-    
+
     labels = []
     if train:
         sentences, labels = sentences.text.copy(), sentences.label.copy()
@@ -21,24 +22,20 @@ def load_sentences(path : str, train : bool = True) -> pd.DataFrame:
 
     return sentences, labels
 
-@log("Loading embeddings")
-def load_word_embeddings(path : str, binary : bool = False, convert_to_w2v : bool = False) -> KeyedVectors:
+
+@log("Load embeddings")
+def load_word_embeddings(path: str, binary: bool = False, convert_to_w2v: bool = False) -> KeyedVectors:
     if convert_to_w2v:
         tmp_file = get_tmpfile("converted")
 
         _ = glove2word2vec(path, tmp_file)
 
     path = tmp_file if convert_to_w2v else path
-    model = KeyedVectors.load_word2vec_format(path ,binary = binary)
+    model = KeyedVectors.load_word2vec_format(path, binary=binary)
     return model
 
-@log("Loading embeddings")
-def load_USE_embeddings(path : str):
+
+@log("Load embeddings")
+def load_USE_embeddings(path: str):
     model = hub.load(path)
     return model
-    
-    
-
-    
-
-
