@@ -1,18 +1,19 @@
 {
-    "data_path" : "data.csv",
-    "model_path" : "saved_models/Model 1/model.h5",
+    "data_path" : "C:\\Users\\Eduardo\\Documents\\pibic\\news data\\TOPBUZZ_NEW\\lexicon_rates_BUZZFEED_FAKE_12lexicons.csv",
+    "model_path" : "saved_models/Model 4/model.h5",
 
     "embeddings" : {
         "type" : "sentence",
         "word" : {
             "length" : 300,
-            "path" : "",
+            "path" : "C:\\Users\\Eduardo\\Google Drive\\embeddings\\glove.kv",
             "binary" : false,
+            "sentence_length" : 200,
             "convert_to_w2v" : false
         },
         "sentence" : {
             "length" : 512,
-            "path" : ""
+            "path" : "C:\\Users\\Eduardo\\Documents\\use"
         }
     },
 

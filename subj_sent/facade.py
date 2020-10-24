@@ -1,12 +1,12 @@
-from sklearn.model_selection import train_test_split
+from functools import partial
+from typing import List
+
+import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from tensorflow.keras import optimizers
 
-from subj_sent import models
-from subj_sent import utils
-
-from functools import partial
-
+from subj_sent import models, utils
 
 models_dict = {"MLP" : models.MLP, "CNN" :  models.CNN}
 optimizers = {'adam' : optimizers.Adam, 'sgd' : optimizers.SGD,
@@ -18,7 +18,7 @@ optimizers = {'adam' : optimizers.Adam, 'sgd' : optimizers.SGD,
 def train(data_path : str, model_path : str, model_params : dict,
           embeddings_params : dict, train_params : dict, preprocess_params : dict) -> list:
  
-    sentences_with_embeddings, labels = _data_preprocess(data_path, True, embeddings_params,
+    sentences_with_embeddings, labels = _data_preprocess(data_path, embeddings_params,
                                                                           preprocess_params)
     input_shape = sentences_with_embeddings[0].shape
     model_params['params']['optimizer'] = optimizers[model_params['params']['optimizer'].lower()]
@@ -56,32 +56,62 @@ def predict(data_path : str, model_path : str, model_params : dict, embeddings_p
                                                                     preprocess_params : dict):
 
     model = _create_model(None, True, model_path, model_params)
-    input_shape = model._input_shape
     
-    sentences_with_embeddings, _ = _data_preprocess(data_path, False, embeddings_params,
-                                                      preprocess_params, input_shape[0])
+    predictions = _preprocess_and_classify(data_path, model, embeddings_params, preprocess_params)
     
-    predictions = pd.Series(model.predict(sentences_with_embeddings).ravel())
-
     save_path = 'data_output/'
-    save_path, count = utils.savefile_name(save_path, "Result")
+    save_path, _ = utils.savefile_name(save_path, "Result")
     csv_path = save_path / f"data.csv"
     predictions.to_csv(csv_path, index = False)
 
-def _data_preprocess(data_path : str, train : bool, embeddings_params : dict, preprocess_params : dict,
-                                                                  padding_length : int = None) -> list:
-    sentences, labels = utils.load_sentences(data_path, train)
+def _preprocess_and_classify(data_path : str, model : models.Model, embeddings_params : dict,
+                             preprocess_params : dict, padding_length : int = None) -> List[str]:
+
+    texts, _ = utils.load_sentences(data_path, False)
+    preprocess_params['mode'] = embeddings_params['type']
+    if embeddings_params['type'] not in ['word','sentence']:
+        raise ValueError("Embedding type must be 'word' or 'sentence'.")
+
+    if preprocess_params['mode'] == 'word':
+        preprocess_params['max_length'] = embeddings_params['sentence_length']
+
+    preprocess = partial(utils.parse_text,**preprocess_params)
+    parsed_texts = texts.apply(preprocess)
+    
+    embeddings_model = None
+    results = []
+    for idx,text in enumerate(parsed_texts):
+        if embeddings_params['type'] == 'word':
+            if embeddings_model is None:
+                embeddings_model = utils.load_word_embeddings(embeddings_params['path'])
+            embeddings = utils.get_word_embeddings_from_text(text,
+                                                             embeddings_model,
+                                                             embeddings_params['length'])
+            embeddings = embeddings.reshape(-1,embeddings_params['sentence_length'],embeddings.shape[1])
+            results.append((texts[idx],model.predict(embeddings).ravel()))
+        else:
+            if embeddings_model is None:
+                embeddings_model = utils.load_USE_embeddings(embeddings_params['path'])
+
+            embeddings = utils.get_sentence_embeddings_from_text(text, embeddings_model)
+            results.append((texts[idx], model.predict(embeddings).ravel()))
+        
+        #results.append(np.array([model.predict([sentence]) for sentence in embeddings]))
+    
+    print(np.array(results).shape)
+    return pd.DataFrame(results,columns=['text','result'])
+            
+def _data_preprocess(data_path : str, embeddings_params : dict, preprocess_params : dict) -> List[str]:
+    sentences, labels = utils.load_sentences(data_path, True)
     preprocess_params['mode'] = embeddings_params['type']
     preprocess = partial(utils.preprocess,**preprocess_params)
     sentences = sentences.apply(preprocess)
 
     if embeddings_params["type"] == "word":
-        model = utils.load_word_embeddings(embeddings_params['path'],
-                                           embeddings_params['binary'],
-                                           embeddings_params['convert_to_w2v'])
+        model = utils.load_word_embeddings(embeddings_params['path'])
         sentences_with_embeddings = utils.get_word_embeddings(sentences, model,
                                                               embeddings_params['length'],
-                                                              padding_length)
+                                                              embeddings_params['sentence_length'])
     elif embeddings_params["type"] == "sentence":
         model = utils.load_USE_embeddings(embeddings_params['path'])
         sentences_with_embeddings = utils.get_sentence_embeddings(sentences, model)
