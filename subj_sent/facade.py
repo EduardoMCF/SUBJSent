@@ -64,6 +64,11 @@ def predict(data_path : str, model_path : str, model_params : dict, embeddings_p
     csv_path = save_path / f"data.csv"
     predictions.to_csv(csv_path, index = False)
 
+def create(filename : str, path_to_model: str, binary: bool = False,
+                        convert_to_w2v: bool = False):
+    
+    utils.save_word_embeddings(filename, path_to_model, binary, convert_to_w2v)
+
 def _preprocess_and_classify(data_path : str, model : models.Model, embeddings_params : dict,
                              preprocess_params : dict, padding_length : int = None) -> List[str]:
 
