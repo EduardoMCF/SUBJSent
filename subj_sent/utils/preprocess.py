@@ -1,17 +1,19 @@
-import numpy as np
-import nltk
-from gensim.models import KeyedVectors
-
-import re
 import gc
-import string
 import itertools
+import re
+import string
 from time import time
+from typing import List
+
+import nltk
+import numpy as np
+from gensim.models import KeyedVectors
+from nltk import tokenize
+
 from .util import log
 
 nltk.download('punkt')
 nltk.download('stopwords')
-
 
 def preprocess(sentence: str,
                mode: str = 'word',
@@ -40,11 +42,38 @@ def preprocess(sentence: str,
     tokens = [token for token in sentence.split() if token not in stopwords]
     return tokens if mode == 'word' else ' '.join(tokens)
 
+def parse_text(text : str, mode : str, max_length : int = 200, remove_stopwords: bool = False):
+    text = tokenize.sent_tokenize(text)
+    sentences = []
+    for sentence in text:
+        preprocessed_sentence = preprocess(sentence, mode, remove_stopwords)
+        if mode == 'word':
+            sentences.extend(_pad_sentence(preprocessed_sentence, max_length))
+        else:
+            sentences.append(preprocessed_sentence)
+
+    return sentences
+
+def get_word_embeddings_from_text(text : List[List[str]], model: KeyedVectors, embeddings_dim: int) -> List[str]:
+    embeddings = []
+    np.random.seed(777)
+    base_embedding = np.random.uniform(-0.25, 0.25, embeddings_dim)
+    for sentence in text:
+        for word in sentence:
+            if type(word) is list:
+                print(word)
+                print(text)
+            if word in model.vocab:
+                embeddings.append(np.array(model.word_vec(word)))
+            else:
+                embeddings.append(base_embedding)
+    
+    return np.array(embeddings)
+
 
 @log("Generate word embeddings")
-def get_word_embeddings(sentences: list, model: KeyedVectors, embeddings_dim: int, pad_length: int = None):
-    indexed_sentences, _, vocabulary_inverse = _parse_data_word_embeddings(
-        sentences, pad_length)
+def get_word_embeddings(sentences: list, model: KeyedVectors, embeddings_dim: int, max_length: int) -> List[str]:
+    indexed_sentences, _, vocabulary_inverse = _parse_data_word_embeddings(sentences, max_length)
     embeddings = _generate_embeddings(
         vocabulary_inverse, model, embeddings_dim)
     del model
@@ -56,6 +85,11 @@ def get_word_embeddings(sentences: list, model: KeyedVectors, embeddings_dim: in
     gc.collect()
     return sentence_embeddings
 
+def get_sentence_embeddings_from_text(text : List[str], model : object):
+    if type(text) is str:
+        print('teste')
+        text = [text]
+    return np.array(model(text))
 
 @log("Generate sentence embeddings")
 def get_sentence_embeddings(sentences: list, model: object):
@@ -65,15 +99,25 @@ def get_sentence_embeddings(sentences: list, model: object):
     res = []
     for chunk in chunks:
         res.append(np.array(model(sentences[chunk[0]:chunk[1]])))
+
     sentence_embeddings = np.concatenate(res)
+
     return sentence_embeddings
 
+def _pad_sentence(sentence : str, max_length : int, padding_symbol : str = '<PAD/>') -> List[List]:
+    if len(sentence) > max_length:
+        sentence = [sentence[idx:idx+max_length] for idx in range(0, len(sentence), max_length)]
+        if len(sentence[-1]) < max_length:
+            sentence[-1] = sentence[-1] + [padding_symbol] * (max_length - len(sentence[-1]))
+    else:
+        sentence = [sentence + [padding_symbol] * (max_length - len(sentence))]
 
-def _pad_sentences(sentences: list, padding_symbol='<PAD/>', max_length: int = None):
-    max_length = max(len(sentence)
-                     for sentence in sentences) if not max_length else max_length
+    return sentence    
+
+def _pad_sentences(sentences: list, max_length: int, padding_symbol='<PAD/>'):
     padded_sentences = np.array([sentence + [padding_symbol] * (max_length - len(sentence))
-                                 for sentence in sentences])
+                                 if len(sentence) <= max_length else sentence[:max_length]
+                                                                for sentence in sentences])
     return padded_sentences
 
 
@@ -93,11 +137,8 @@ def _parse_data_word_embeddings(sentences: list, pad_length: int) -> tuple:
 
 
 def _generate_embeddings(vocabulary_inverse: list, model: KeyedVectors, embeddings_dim: int) -> dict:
-    embeddings_concatenated = np.concatenate(
-        [model.word_vec(word) for word in list(model.vocab.keys())[:10**6]])
-    embeddings_variance = np.var(embeddings_concatenated, ddof=1)
-    base_embedding = np.random.uniform(-embeddings_variance,
-                                       embeddings_variance, embeddings_dim)
+    np.random.seed(777)
+    base_embedding = np.random.uniform(-0.25, 0.25, embeddings_dim)
 
     embeddings = {}
     for id, word in enumerate(vocabulary_inverse):
